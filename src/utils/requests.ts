@@ -78,7 +78,15 @@ export const addRoom = (roomName: string, serverId: number) => {
 };
 
 export const enterRoom = (roomId: number) => {
-    return apiRequest({ method: "POST", url: `/api/room/joinRoom`, body: { roomId: roomId } });
+    return apiRequest({ method: "POST", url: `/api/room/joinRoom`, body: { roomId: roomId } })
+}
+
+export const saveMessage = (roomId:number, message:string) => {
+  return apiRequest({ method:'POST', url:`/api/room/sendMessage`, body: { roomId: roomId, message: message } })
+}
+
+export const getMessage = (roomId:number) => {
+  return apiRequest({ method:'POST', url:`/api/room/getMessage`, body: { roomId: roomId } })
 }
 
 export const getTokenForRoomEnter = (userId: number): string => {

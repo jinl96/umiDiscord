@@ -86,6 +86,7 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    Int
+  userName String
   roomId    Int
   Room      Room?    @relation(fields: [roomId], references: [id])
 }

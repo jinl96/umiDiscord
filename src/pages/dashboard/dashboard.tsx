@@ -3,6 +3,7 @@ import styles from './dashboard.less';
 import { addServer, verifyToken, getServerList, getRoomList, addRoom, getTokenForRoomEnter } from '@/utils/requests';
 import { message, Button, Modal, Input } from 'antd';
 import { Navigate, useNavigate } from 'umi';
+import { RtmChannel, RtmClient } from 'agora-rtm-sdk';
 import ChatPanel from '@/components/ChatPanel/ChatPanel';
 
 interface APIResponse {
@@ -37,9 +38,15 @@ type ServerType = {
   serverName: string;
 }
 
+interface serverListResponseType {
+  ownedServers: ServerType[];
+  subscribedServerList: ServerType[];
+}
+
 interface ServerListType {
   [key: string]: ServerType;
 }
+
 
 export default function Dashboard() {
   const [user, setUser] = useState<UserType>({});
@@ -51,14 +58,17 @@ export default function Dashboard() {
   const [roomName, setRoomName] = useState<string>('');
   // server list
   const [serverList, setServerList] = useState<Array<ServerType>>([]);
+  const [subscribedServerList, setSubscribedServerList] = useState<Array<ServerType>>([]);
   // room list
   const [roomList, setRoomList] = useState<Array<RoomType>>([]);
 
   //selection
-  const [selectedServerId, setSelectedServerId] = useState<number|undefined>(void 0);
-  const [selectedRoomId, setSelectedRoomId] = useState<number|undefined>(void 0);
+  const [selectedServerId, setSelectedServerId] = useState<number | undefined>(void 0);
+  const [selectedRoomId, setSelectedRoomId] = useState<number | undefined>(void 0);
 
-  const selectedRoomName = React.useMemo(() => { return roomList.find(item => item.id === selectedRoomId)?.name}, [selectedRoomId, roomList])
+  const [chatUserClient, setChatUserClient] = useState<RtmClient>();
+
+  const selectedRoomName = React.useMemo(() => { return roomList.find(item => item.id === selectedRoomId)?.name }, [selectedRoomId, roomList])
 
   console.log(selectedRoomName);
 
@@ -77,15 +87,21 @@ export default function Dashboard() {
         try {
           const res = await verifyToken() as APIResponse;
           if (res.ok) {
-            res.json().then(res => {
+            res.json().then(async res => {
               setUser(res);
+              const { default: AgoraRTM } = await import('agora-rtm-sdk');
+              const token = getTokenForRoomEnter(res.id!);
+              const client = AgoraRTM.createInstance(process.env.AGORA_ID!);
+              setChatUserClient(client);
+              const uid = res.id!.toString();
+              await client.login({uid, token})
             })
           } else {
-            message.warning('Something went wrong', 2)
+            message.warning('Please Log in', 2)
             navigate('/login')
           }
         } catch (error: any) {
-          message.warning(error, 2)
+          message.warning('Please Log in', 2)
           navigate('/login')
         }
       })();
@@ -93,11 +109,11 @@ export default function Dashboard() {
     }
   }, [])
 
-  const updateRoomList = async() => {
+  const updateRoomList = async () => {
     if (!selectedServerId) {
       return
     }
-    try{
+    try {
       const res = await getRoomList(selectedServerId) as APIResponse;
       if (res.ok) {
         const rList = await res.json() as RoomListType;
@@ -109,7 +125,7 @@ export default function Dashboard() {
       } else {
         message.warning('Something went wrong', 2)
       }
-    } catch(error) {
+    } catch (error) {
       console.log(error);
     }
   }
@@ -117,12 +133,17 @@ export default function Dashboard() {
   const updateServerList = async () => {
     try {
       const res = await getServerList() as APIResponse;
-      const servers = await res.json() as ServerListType;
-      let serList = [] as Array<ServerType>;
-      Object.values(servers).forEach((server) => {
-        serList.push(server);
+      const servers = await res.json() as serverListResponseType;
+      let ownedSerList = [] as Array<ServerType>;
+      let subscribedSerList = [] as Array<ServerType>; 
+      Object.values(servers.ownedServers).forEach((server) => {
+        ownedSerList.push(server);
       })
-      setServerList(serList);
+      Object.values(servers.subscribedServerList).forEach((server) => {
+        subscribedSerList.push(server);
+      })
+      setServerList(ownedSerList);
+      setSubscribedServerList(subscribedSerList);
     } catch (error: any) {
       message.warning(error, 2)
     }
@@ -141,7 +162,7 @@ export default function Dashboard() {
   }
 
   const addNewRoom = async () => {
-    if (roomName === ''){
+    if (roomName === '') {
       message.warning('Room name cannot be empty', 2)
       return;
     }
@@ -160,9 +181,9 @@ export default function Dashboard() {
     }
   }
 
-  const enterSelectedRoom = (roomId:number) => {
+  const enterSelectedRoom = (roomId: number) => {
     setSelectedRoomId(roomId);
-    if (typeof user?.id === 'number'){
+    if (typeof user?.id === 'number') {
       console.log(getTokenForRoomEnter(user.id));
     }
   }
@@ -204,13 +225,27 @@ export default function Dashboard() {
             {
               serverList.map((server) => {
                 let color
-                server.id === selectedServerId ? color = 'bg-indigo-400' :  color = 'bg-sky-500/50';
+                server.id === selectedServerId ? color = 'bg-indigo-400' : color = 'bg-sky-500/50';
                 return (
-                  <div key={server.id} 
-                  onClick={() => {
-                    setSelectedServerId(server.id)
-                    setSelectedRoomId(void 0)
-                  }} className={`cursor-pointer p-3 flex mt-1 mb-1 flex-col justify-center text-center items-center rounded-full ${color} h-20 w-20`}>
+                  <div key={server.id}
+                    onClick={() => {
+                      setSelectedServerId(server.id)
+                      setSelectedRoomId(void 0)
+                    }} className={`cursor-pointer p-3 flex mt-1 mb-1 flex-col justify-center text-center items-center rounded-full ${color} h-20 w-20`}>
+                    {server.serverName}
+                  </div>)
+              })
+            }
+            {
+              subscribedServerList.map((server) => {
+                let color
+                server.id === selectedServerId ? color = 'bg-indigo-400' : color = 'bg-sky-500/50';
+                return (
+                  <div key={server.id}
+                    onClick={() => {
+                      setSelectedServerId(server.id)
+                      setSelectedRoomId(void 0)
+                    }} className={`cursor-pointer p-3 flex mt-1 mb-1 flex-col justify-center text-center items-center rounded-full ${color} h-20 w-20`}>
                     {server.serverName}
                   </div>)
               })
@@ -234,8 +269,8 @@ export default function Dashboard() {
               })
             }
           </div>
-          <div className='flex min-h-full min-w-min w-full'>
-            <ChatPanel userId={user.id} selectedRoomId={selectedRoomId} selectedRoomName={selectedRoomName}></ChatPanel>
+          <div className='flex min-h-full min-w-full w-full'>
+            <ChatPanel userName={user.name!} chatClient={chatUserClient!} userId={user.id} selectedRoomId={selectedRoomId} selectedRoomName={selectedRoomName}></ChatPanel>
           </div>
         </div>
       </div>

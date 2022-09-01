@@ -2,14 +2,16 @@ import type { UmiApiRequest, UmiApiResponse } from "umi";
 import pris from "../../../utils/prisma";
 import { verifyToken } from "../../../utils/jwt";
 
+
 export default async function (req: UmiApiRequest, res: UmiApiResponse) {
   switch (req.method) {
     case "POST":
       try {
         const prisma = pris;
-        const serverId: number = parseInt(req.body.serverId);
+        const roomId:number = req.body.roomId;
         const tok = req.headers.authorization?.split(" ")[1];
         const token = await verifyToken(tok as string);
+        const message = req.body.message;
         const user = await prisma.user.findUnique({
           where: { id: token.id },
         });
@@ -17,20 +19,15 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
           res.status(500).json({ message: "Invalid token" });
           break;
         }
-        const findServer = await prisma.server.findUnique({
-          where: { id: serverId },
+        const messageUpdate = await prisma.message.create({
+            data: {
+                roomId: roomId,
+                content: message,
+                userId: user.id,
+                userName: user.name
+            }
         })
-        if (findServer?.userId === user.id) {
-          res.status(500).json({ message: "Cannot subscribe to your own server" });
-          break;
-        }
-        const userSubscription = await prisma.userSubscription.create({
-          data: {
-            user: { connect: { id: user.id } },
-            server: { connect: { id: serverId } },
-          },
-        })
-        res.status(201).json({ message: "Subscribed" });
+        res.status(200).json({ message: "Message Saved" });
       } catch (error: any) {
         res.status(500).json(error);
       }

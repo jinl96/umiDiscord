@@ -32687,12 +32687,12 @@ var require_apiRoute = __commonJS2({
   }
 });
 
-// src/.umi/api/server/subscribe/index.ts
-var subscribe_exports = {};
-__export2(subscribe_exports, {
-  default: () => subscribe_default2
+// src/.umi/api/room/sendMessage/index.ts
+var sendMessage_exports = {};
+__export2(sendMessage_exports, {
+  default: () => sendMessage_default2
 });
-module.exports = __toCommonJS2(subscribe_exports);
+module.exports = __toCommonJS2(sendMessage_exports);
 
 // src/.umi/api/_middlewares.ts
 var middlewares_default = async (req, res, next) => {
@@ -32725,15 +32725,16 @@ function verifyToken(token) {
   });
 }
 
-// src/api/server/subscribe/index.ts
-async function subscribe_default(req, res) {
+// src/api/room/sendMessage/index.ts
+async function sendMessage_default(req, res) {
   switch (req.method) {
     case "POST":
       try {
         const prisma2 = prisma_default;
-        const serverId = parseInt(req.body.serverId);
+        const roomId = req.body.roomId;
         const tok = req.headers.authorization?.split(" ")[1];
         const token = await verifyToken(tok);
+        const message = req.body.message;
         const user = await prisma2.user.findUnique({
           where: { id: token.id }
         });
@@ -32741,20 +32742,15 @@ async function subscribe_default(req, res) {
           res.status(500).json({ message: "Invalid token" });
           break;
         }
-        const findServer = await prisma2.server.findUnique({
-          where: { id: serverId }
-        });
-        if (findServer?.userId === user.id) {
-          res.status(500).json({ message: "Cannot subscribe to your own server" });
-          break;
-        }
-        const userSubscription = await prisma2.userSubscription.create({
+        const messageUpdate = await prisma2.message.create({
           data: {
-            user: { connect: { id: user.id } },
-            server: { connect: { id: serverId } }
+            roomId,
+            content: message,
+            userId: user.id,
+            userName: user.name
           }
         });
-        res.status(201).json({ message: "Subscribed" });
+        res.status(200).json({ message: "Message Saved" });
       } catch (error2) {
         res.status(500).json(error2);
       }
@@ -32764,7 +32760,7 @@ async function subscribe_default(req, res) {
   }
 }
 
-// src/.umi/api/server/subscribe/index.ts
+// src/.umi/api/room/sendMessage/index.ts
 var import_apiRoute = __toESM2(require_apiRoute());
 var apiRoutes = [{ "path": "room/sendMessage", "id": "room/sendMessage/index", "file": "room/sendMessage/index.ts", "absPath": "/room/sendMessage", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
 import pris from "../../../utils/prisma";
@@ -32973,12 +32969,12 @@ export default async function (req:UmiApiRequest, res:UmiApiResponse) {
       res.status(405).json({ errof:'Method not allowed' })
   }
 }` }, { "path": "URL", "id": "URL", "file": "URL.ts", "absPath": "/URL", "__content": "export const API_URL = 'http://localhost:8000';\nexport default API_URL;" }];
-var subscribe_default2 = async (req, res) => {
+var sendMessage_default2 = async (req, res) => {
   const umiReq = new import_apiRoute.UmiApiRequest(req, apiRoutes);
   await umiReq.readBody();
   const umiRes = new import_apiRoute.UmiApiResponse(res);
   await new Promise((resolve) => middlewares_default(umiReq, umiRes, resolve));
-  await subscribe_default(umiReq, umiRes);
+  await sendMessage_default(umiReq, umiRes);
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {});
