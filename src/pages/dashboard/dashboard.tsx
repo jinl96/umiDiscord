@@ -232,14 +232,14 @@ export default function Dashboard() {
         </div>
         <div style={{ width: '100%' }}>
           <h1 className={styles.title}>Welcome, {user.name}({user.email})</h1>
-          <Input style={{ width: '100px' }}
+          <Input style={{ width: '100px' }} 
             onChange={(e) => {
               if (typeof parseInt(e.target.value) === 'number') {
-                setServerSubInput(parseInt(e.target.value))
+              setServerSubInput(parseInt(e.target.value))
               }
-            }
-            }
-            value={serverSubInput}
+              }
+            } 
+            value={serverSubInput} 
             placeholder='enter server id'>
           </Input>
           <Button onClick={subscribeToServer}>subscribe</Button>
