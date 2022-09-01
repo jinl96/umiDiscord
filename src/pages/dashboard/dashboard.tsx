@@ -213,6 +213,7 @@ export default function Dashboard() {
         </div>
         <div style={{ width: '100%' }}>
           <h1 className={styles.title}>Welcome, {user.name}({user.email})</h1>
+          <Button>subscribe</Button>
         </div>
         <div className='flex flex-row min-h-screen'>
           <div className='flex flex-col items-center min-h-full min-w-min w-1/12 bg-indigo-100' style={{ minWidth: '100px' }}>
