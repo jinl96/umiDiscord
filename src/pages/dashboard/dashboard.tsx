@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import styles from './dashboard.less';
-import { addServer, verifyToken, getServerList, getRoomList, addRoom, getTokenForRoomEnter } from '@/utils/requests';
+import { addServer, verifyToken, getServerList, getRoomList, addRoom, getTokenForRoomEnter, serverSubscription } from '@/utils/requests';
 import { message, Button, Modal, Input } from 'antd';
 import { Navigate, useNavigate } from 'umi';
 import { RtmChannel, RtmClient } from 'agora-rtm-sdk';
@@ -68,9 +68,10 @@ export default function Dashboard() {
 
   const [chatUserClient, setChatUserClient] = useState<RtmClient>();
 
+  const [serverSubInput, setServerSubInput] = useState<number>()
+
   const selectedRoomName = React.useMemo(() => { return roomList.find(item => item.id === selectedRoomId)?.name }, [selectedRoomId, roomList])
 
-  console.log(selectedRoomName);
 
   const navigate = useNavigate();
 
@@ -94,7 +95,7 @@ export default function Dashboard() {
               const client = AgoraRTM.createInstance(process.env.AGORA_ID!);
               setChatUserClient(client);
               const uid = res.id!.toString();
-              await client.login({uid, token})
+              await client.login({ uid, token })
             })
           } else {
             message.warning('Please Log in', 2)
@@ -135,7 +136,7 @@ export default function Dashboard() {
       const res = await getServerList() as APIResponse;
       const servers = await res.json() as serverListResponseType;
       let ownedSerList = [] as Array<ServerType>;
-      let subscribedSerList = [] as Array<ServerType>; 
+      let subscribedSerList = [] as Array<ServerType>;
       Object.values(servers.ownedServers).forEach((server) => {
         ownedSerList.push(server);
       })
@@ -188,6 +189,24 @@ export default function Dashboard() {
     }
   }
 
+  const subscribeToServer = async () => {
+    if (!serverSubInput) {
+      return
+    }
+    try {
+      const res = await serverSubscription(serverSubInput) as APIResponse;
+      if (res.ok) {
+        message.success('Server subscribed successfully', 2)
+        setServerSubInput(undefined);
+        updateServerList();
+      } else {
+        message.warning('Already Subscribed', 2)
+      }
+    } catch (error: any) {
+      message.warning(error, 2)
+    }
+  }
+
   if (typeof user?.id === 'number') {
     return (
       <div>
@@ -213,7 +232,17 @@ export default function Dashboard() {
         </div>
         <div style={{ width: '100%' }}>
           <h1 className={styles.title}>Welcome, {user.name}({user.email})</h1>
-          <Button>subscribe</Button>
+          <Input style={{ width: '100px' }}
+            onChange={(e) => {
+              if (typeof parseInt(e.target.value) === 'number') {
+                setServerSubInput(parseInt(e.target.value))
+              }
+            }
+            }
+            value={serverSubInput}
+            placeholder='enter server id'>
+          </Input>
+          <Button onClick={subscribeToServer}>subscribe</Button>
         </div>
         <div className='flex flex-row min-h-screen'>
           <div className='flex flex-col items-center min-h-full min-w-min w-1/12 bg-indigo-100' style={{ minWidth: '100px' }}>

@@ -89,6 +89,10 @@ export const getMessage = (roomId:number) => {
   return apiRequest({ method:'POST', url:`/api/room/getMessage`, body: { roomId: roomId } })
 }
 
+export const serverSubscription = (serverId: number) => {
+  return apiRequest({ method: "POST", url: "/api/server/subscribe", body: { serverId: serverId } });
+}
+
 export const getTokenForRoomEnter = (userId: number): string => {
   const {
     RtcTokenBuilder,

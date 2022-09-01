@@ -32,7 +32,7 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
         })
         res.status(201).json({ message: "Subscribed" });
       } catch (error: any) {
-        res.status(500).json(error);
+        res.status(500).json('Already subscribed!');
       }
       break;
     default:
