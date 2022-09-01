@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+ 
+datasource db {
+  provider = "mysql"
+  referentialIntegrity = "prisma"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_URL")
+}
+ 
+model Post {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String   @db.VarChar(255)
+  content   String?
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  imageUrl  String?
+  tags      String
+ 
+  @@index(authorId)
+}
+ 
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  passwordHash  String
+  name          String   @unique
+  posts         Post[]
+  avatarUrl     String?
+  Servers       Server[]  @relation("UserServers")
+  UserServers   UserServers[]
+  Room          Room?    @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  roomId        Int?
+  Subscription  Server[]  @relation("UserSubscription")
+  UserSubscription  UserSubscription[]
+}
+
+
+
+model Server {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  serverName String
+  User      User?    @relation( "UserServers", fields: [userId], references: [id])
+  UserServers   UserServers[]
+  rooms    Room[]   
+  SubscribedUsers User[] @relation("UserSubscription")
+  UserSubscription  UserSubscription[]
+}
+
+
+model UserServers {
+  user    User    @relation(fields: [userId], references: [id])
+  userId  Int
+  server Server  @relation(fields: [serverId], references: [id])
+  serverId Int
+
+  @@id([userId, serverId])
+}
+
+model UserSubscription {
+  user    User    @relation(fields: [userId], references: [id])
+  userId  Int
+  server Server  @relation(fields: [serverId], references: [id])
+  serverId Int
+
+  @@id([userId, serverId])
+}
+
+model Room {
+  id        Int      @id @default(autoincrement())
+  name      String
+  serverId  Int
+  Server    Server?  @relation(fields: [serverId], references: [id])
+  Messages  Message[]
+  Users     User[]
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int
+  roomId    Int
+  Room      Room?    @relation(fields: [roomId], references: [id])
+}
