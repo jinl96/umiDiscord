@@ -1,0 +1,68 @@
+Arguments: 
+  /usr/local/bin/node /Users/jinyangliu/.yarn/bin/yarn.js add @types/react-duration-voice-recorder
+
+PATH: 
+  /Users/jinyangliu/.yarn/bin:/Users/jinyangliu/.config/yarn/global/node_modules/.bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Users/jinyangliu/.yarn/bin:/Users/jinyangliu/.config/yarn/global/node_modules/.bin:/Users/jinyangliu/opt/anaconda3/bin:/Users/jinyangliu/opt/anaconda3/condabin:/opt/local/bin:/opt/local/sbin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  16.14.2
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: https://registry.npmmirror.com/@types%2freact-duration-voice-recorder: [NOT_FOUND] @types/react-duration-voice-recorder not found
+      at Request.params.callback [as _callback] (/Users/jinyangliu/.yarn/lib/cli.js:66145:18)
+      at Request.self.callback (/Users/jinyangliu/.yarn/lib/cli.js:140890:22)
+      at Request.emit (node:events:526:28)
+      at Request.<anonymous> (/Users/jinyangliu/.yarn/lib/cli.js:141862:10)
+      at Request.emit (node:events:526:28)
+      at Gunzip.<anonymous> (/Users/jinyangliu/.yarn/lib/cli.js:141784:12)
+      at Object.onceWrapper (node:events:645:28)
+      at Gunzip.emit (node:events:526:28)
+      at endReadableNT (node:internal/streams/readable:1345:12)
+      at processTicksAndRejections (node:internal/process/task_queues:83:21)
+
+npm manifest: 
+  {
+    "private": true,
+    "author": "jinl96 <jinyangliu1996@gmail.com>",
+    "scripts": {
+      "dev": "umi dev",
+      "build": "prisma generate && umi build",
+      "postinstall": "umi setup",
+      "setup": "umi setup",
+      "start": "npm run dev"
+    },
+    "dependencies": {
+      "@prisma/client": "^4.2.1",
+      "@types/bcryptjs": "^2.4.2",
+      "@types/jsonwebtoken": "^8.5.9",
+      "agora-access-token": "^2.0.4",
+      "agora-rtm-sdk": "^1.5.1",
+      "antd": "^4.22.8",
+      "bcryptjs": "^2.4.3",
+      "js-audio-recorder": "^1.0.7",
+      "jsonwebtoken": "^8.5.1",
+      "prisma": "^4.2.1",
+      "react-duration-voice-recorder": "^1.0.0",
+      "react-voice-recorder": "^2.1.2",
+      "umi": "^4.0.15"
+    },
+    "devDependencies": {
+      "@types/react": "^18.0.0",
+      "@types/react-dom": "^18.0.0",
+      "@umijs/plugins": "^4.0.15",
+      "tailwindcss": "^3",
+      "typescript": "^4.1.2"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

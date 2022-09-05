@@ -1,8 +1,5 @@
 import type { UmiApiRequest, UmiApiResponse } from "umi";
 import pris from "../../utils/prisma";
-import { verifyToken } from "../../utils/jwt";
-import verify from ".././verify";
-
 interface user {
   id: number;
 }

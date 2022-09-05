@@ -62,6 +62,7 @@ model UserServers {
   @@id([userId, serverId])
 }
 
+
 model UserSubscription {
   user    User    @relation(fields: [userId], references: [id])
   userId  Int
@@ -73,6 +74,7 @@ model UserSubscription {
 
 model Room {
   id        Int      @id @default(autoincrement())
+  type     String       @default("room")
   name      String
   serverId  Int
   Server    Server?  @relation(fields: [serverId], references: [id])
@@ -80,9 +82,12 @@ model Room {
   Users     User[]
 }
 
+
 model Message {
   id        Int      @id @default(autoincrement())
-  content   String
+  type     String    @default("text")
+  content   String? 
+  audio     String?   @db.LongText
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    Int

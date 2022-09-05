@@ -376,7 +376,7 @@ var URL_default = API_URL;
 
 // src/.umi/api/URL.ts
 var import_apiRoute = __toESM(require_apiRoute());
-var apiRoutes = [{ "path": "room/sendMessage", "id": "room/sendMessage/index", "file": "room/sendMessage/index.ts", "absPath": "/room/sendMessage", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport pris from "../../../utils/prisma";\nimport { verifyToken } from "../../../utils/jwt";\n\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  switch (req.method) {\n    case "POST":\n      try {\n        const prisma = pris;\n        const roomId:number = req.body.roomId;\n        const tok = req.headers.authorization?.split(" ")[1];\n        const token = await verifyToken(tok as string);\n        const message = req.body.message;\n        const user = await prisma.user.findUnique({\n          where: { id: token.id },\n        });\n        if (!user || !token) {\n          res.status(500).json({ message: "Invalid token" });\n          break;\n        }\n        const messageUpdate = await prisma.message.create({\n            data: {\n                roomId: roomId,\n                content: message,\n                userId: user.id,\n                userName: user.name\n            }\n        })\n        res.status(200).json({ message: "Message Saved" });\n      } catch (error: any) {\n        res.status(500).json(error);\n      }\n      break;\n    default:\n      res.status(405).json({ errof: "Method not allowed" });\n  }\n}\n' }, { "path": "server/subscribe", "id": "server/subscribe/index", "file": "server/subscribe/index.ts", "absPath": "/server/subscribe", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
+var apiRoutes = [{ "path": "room/voiceMessage/[roomId]", "id": "room/voiceMessage/[roomId]", "file": "room/voiceMessage/[roomId].ts", "absPath": "/room/voiceMessage/[roomId]", "__content": "" }, { "path": "room/historyMessage", "id": "room/historyMessage/index", "file": "room/historyMessage/index.ts", "absPath": "/room/historyMessage", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport pris from "../../../utils/prisma";\nimport { verifyToken } from "../../../utils/jwt";\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  switch (req.method) {\n    case "POST":\n      try {\n        const prisma = pris;\n        const roomId: number = req.body.roomId;\n        const tok = req.headers.authorization?.split(" ")[1];\n        const token = await verifyToken(tok as string);\n        const message = req.body.message;\n        const user = await prisma.user.findUnique({\n          where: { id: token.id },\n        });\n        if (!user || !token) {\n          res.status(500).json({ message: "Invalid token" });\n          break;\n        }\n        const messages = await prisma.message.findMany({\n            where: { roomId: roomId },\n            orderBy: { createdAt: "asc" },\n        })\n        res.status(200).json({ message: "Loaded Messages", messages: messages });\n      } catch (error: any) {\n        res.status(500).json(error);\n      }\n      break;\n    default:\n      res.status(405).json({ errof: "Method not allowed" });\n  }\n}\n' }, { "path": "server/subscription", "id": "server/subscription/index", "file": "server/subscription/index.ts", "absPath": "/server/subscription", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
 import pris from "../../../utils/prisma";
 import { verifyToken } from "../../../utils/jwt";
 
@@ -417,17 +417,17 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
       res.status(405).json({ errof: "Method not allowed" });
   }
 }
-` }, { "path": "room/getMessage", "id": "room/getMessage/index", "file": "room/getMessage/index.ts", "absPath": "/room/getMessage", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport pris from "../../../utils/prisma";\nimport { verifyToken } from "../../../utils/jwt";\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  switch (req.method) {\n    case "POST":\n      try {\n        const prisma = pris;\n        const roomId: number = req.body.roomId;\n        const tok = req.headers.authorization?.split(" ")[1];\n        const token = await verifyToken(tok as string);\n        const message = req.body.message;\n        const user = await prisma.user.findUnique({\n          where: { id: token.id },\n        });\n        if (!user || !token) {\n          res.status(500).json({ message: "Invalid token" });\n          break;\n        }\n        const messages = await prisma.message.findMany({\n            where: { roomId: roomId },\n            orderBy: { createdAt: "asc" },\n        })\n        res.status(200).json({ message: "Loaded Messages", messages: messages });\n      } catch (error: any) {\n        res.status(500).json(error);\n      }\n      break;\n    default:\n      res.status(405).json({ errof: "Method not allowed" });\n  }\n}\n' }, { "path": "room/joinRoom", "id": "room/joinRoom/index", "file": "room/joinRoom/index.ts", "absPath": "/room/joinRoom", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport pris from "../../../utils/prisma";\nimport { verifyToken } from "../../../utils/jwt";\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n    switch (req.method) {\n        case "POST":\n        try {\n            const prisma = pris;\n            const roomId: number = parseInt(req.body.roomId);\n            const tok = req.headers.authorization?.split(" ")[1];\n            const token = await verifyToken(tok as string);\n            const user = await prisma.user.findUnique({\n            where: { id: token.id },\n            });\n            if (!user || !token) {\n            res.status(500).json({ message: "Invalid token" });\n            break;\n            }\n            console.log(token)\n            const joinRoom = await prisma.user.update({\n                where: {\n                    id: user.id\n                },\n                data: {\n                    roomId: roomId\n                }\n            })\n\n            res.status(201).json({ message: "Joined" });\n        } catch (error: any) {\n            res.status(500).json(error);\n        }\n        break;\n        default:\n        res.status(405).json({ errof: "Method not allowed" });\n    }\n}\n' }, { "path": "server/[serverId]", "id": "server/[serverId]", "file": "server/[serverId].ts", "absPath": "/server/[serverId]", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport pris from "../../utils/prisma";\nimport { verifyToken } from "../../utils/jwt";\nimport verify from ".././verify";\n\ninterface user {\n  id: number;\n}\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  switch (req.method) {\n    case "GET":\n      try {\n        const prisma = pris;\n        const serverId:number = parseInt(req.params.serverId);\n        const rooms = await prisma.room.findMany({\n            where: { serverId: serverId },\n        });\n        res.status(200).json({ ...rooms });\n      } catch (error: any) {\n        res.status(500).json(error);\n      }\n      break;\n    default:\n      res.status(405).json({ errof: "Method not allowed" });\n  }\n}\n' }, { "path": "posts/[postId]", "id": "posts/[postId]", "file": "posts/[postId].ts", "absPath": "/posts/[postId]", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\n \nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  res.status(400).json({ error: "This API is not implemented yet." })\n}' }, { "path": "getServerList", "id": "getServerList", "file": "getServerList.ts", "absPath": "/getServerList", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport pris from "../utils/prisma";\nimport { verifyToken } from "../utils/jwt";\nimport verify from "./verify";\nimport { Server } from "@prisma/client";\n\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  switch (req.method) {\n    case "GET":\n      try {\n        const prisma = pris;\n        const tok = req.headers.authorization?.split(" ")[1];\n        const token = await verifyToken(tok as string);\n        const user = await prisma.user.findUnique({\n          where: { id: token.id },\n        });\n        if (!user || !token) {\n          res.status(500).json({ message: "Invalid token" });\n          break;\n        }\n        const ownedServers = await prisma.server.findMany({\n          where: { userId: user.id },\n        });\n        const subscribedServers = await prisma.userSubscription.findMany({\n          where: { userId: user.id },\n        });\n        let subscribedServerList: (Server | null)[] = [];\n        await Promise.all(subscribedServers.map(async server => {\n          const serverFound = await prisma.server.findUnique({\n            where: { id: server.serverId }\n          })\n          subscribedServerList.push(serverFound)\n          \n        }))\n        res.status(200).json({ ownedServers, subscribedServerList });\n      } catch (error: any) {\n        res.status(500).json(error);\n      }\n      break;\n    default:\n      res.status(405).json({ errof: "Method not allowed" });\n  }\n}\n' }, { "path": "posts", "id": "posts/index", "file": "posts/index.ts", "absPath": "/posts", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\n \nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  res.status(400).json({ error: "This API is not implemented yet." })\n}' }, { "path": "newServer", "id": "newServer", "file": "newServer.ts", "absPath": "/newServer", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
-import pris from "../utils/prisma";
-import { verifyToken } from "../utils/jwt";
+` }, { "path": "server/serverList", "id": "server/serverList/index", "file": "server/serverList/index.ts", "absPath": "/server/serverList", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
+import pris from "../../../utils/prisma";
+import { verifyToken } from "../../../utils/jwt";
+import verify from "../../token";
+import { Server } from "@prisma/client";
 
-interface user {
-  id: number;
-}
 
 export default async function (req: UmiApiRequest, res: UmiApiResponse) {
+  console.log('serverlist')
   switch (req.method) {
-    case "POST":
+    case "GET":
       try {
         const prisma = pris;
         const tok = req.headers.authorization?.split(" ")[1];
@@ -435,46 +435,37 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
         const user = await prisma.user.findUnique({
           where: { id: token.id },
         });
-        if (!user || !token){
-          res.status(500).json({message: 'Invalid token'})
+        if (!user || !token) {
+          res.status(500).json({ message: "Invalid token" });
           break;
         }
-        if (user) {
-          const userId: number = user.id;
-          const server = await prisma.server.create({
-            data: {
-              userId: user.id,
-              serverName: req.body.serverName,
-            },
-          });
-          const userServers = await prisma.userServers.create({
-            data: {
-              userId: user.id,
-              serverId: server.id,
-            },
-          });
-          res.status(201).json({ ...userServers });
-          await prisma.$disconnect();
-        }
-      } catch (e: any) {
-        res.status(500).json({
-          result: false,
-          message:
-            typeof e.code === "string"
-              ? "https://www.prisma.io/docs/reference/api-reference/error-reference#" +
-                e.code.toLowerCase()
-              : e,
+        const ownedServers = await prisma.server.findMany({
+          where: { userId: user.id },
         });
+        const subscribedServers = await prisma.userSubscription.findMany({
+          where: { userId: user.id },
+        });
+        let subscribedServerList: (Server | null)[] = [];
+        await Promise.all(subscribedServers.map(async server => {
+          const serverFound = await prisma.server.findUnique({
+            where: { id: server.serverId }
+          })
+          subscribedServerList.push(serverFound)
+          
+        }))
+        res.status(200).json({ ownedServers, subscribedServerList });
+      } catch (error: any) {
+        res.status(500).json(error);
       }
       break;
     default:
-      res.status(405).json({ error: "Method not allowed" });
+      res.status(405).json({ errof: "Method not allowed" });
   }
 }
-` }, { "path": "register", "id": "register", "file": "register.ts", "absPath": "/register", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport bcrypt from "bcryptjs";\nimport { signToken } from "../utils/jwt";\nimport pris from "../utils/prisma";\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  switch (req.method) {\n    case "POST":\n      try {\n        const prisma = pris;\n\n        const findUser = await prisma.user.findUnique({\n          where: { email: req.body.email },\n        });\n        if (findUser) {\n          res.status(409)\n            .json({ message: "User already exists" });\n          break;\n        }\n        const user = await prisma.user.create({\n          data: {\n            email: req.body.email,\n            passwordHash: bcrypt.hashSync(req.body.password, 8),\n            name: req.body.name,\n            avatarUrl: req.body.avatarUrl,\n          },\n        });\n        const token = await signToken(user.id);\n        const server = await prisma.server.create({\n          data: {\n            userId: user.id,\n            serverName: `${user.name}\'s server`\n          }\n        });\n        const userServers = await prisma.userServers.create({\n          data:{\n            userId: user.id,\n            serverId: server.id,\n          }\n        })\n        res\n          .status(201)\n          .setCookie("token", token)\n          .json({ ...user, passwordHash: undefined, token: token });\n        await prisma.$disconnect();\n      } catch (e: any) {\n        res.status(500).json({\n          result: false,\n          message:\n            typeof e.code === "string"\n              ? "https://www.prisma.io/docs/reference/api-reference/error-reference#" +\n                e.code.toLowerCase()\n              : e,\n        });\n      }\n      break;\n    default:\n      // \u5982\u679C\u4E0D\u662F POST \u8BF7\u6C42\uFF0C\u4EE3\u8868\u4ED6\u6B63\u5728\u7528\u9519\u8BEF\u7684\u65B9\u5F0F\u8BBF\u95EE\u8FD9\u4E2A API\n      res.status(405).json({ error: "Method not allowed" });\n  }\n}\n' }, { "path": "addRoom", "id": "addRoom", "file": "addRoom.ts", "absPath": "/addRoom", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
-import pris from "../utils/prisma";
-import { verifyToken } from "../utils/jwt";
-import verify from "./verify";
+` }, { "path": "room/message", "id": "room/message/index", "file": "room/message/index.ts", "absPath": "/room/message", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport pris from "../../../utils/prisma";\nimport { verifyToken } from "../../../utils/jwt";\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  switch (req.method) {\n    case "POST":\n      try {\n        const prisma = pris;\n        const roomId: number = req.body.roomId;\n        const tok = req.headers.authorization?.split(" ")[1];\n        const token = await verifyToken(tok as string);\n        const message = req.body.message;\n        const user = await prisma.user.findUnique({\n          where: { id: token.id },\n        });\n        if (!user || !token) {\n          res.status(500).json({ message: "Invalid token" });\n          break;\n        }\n        if (req.body.type === "text") {\n          console.log("m", req.body.message);\n          const messageUpdate = await prisma.message.create({\n            data: {\n              roomId: roomId,\n              content: message,\n              userId: user.id,\n              userName: user.name,\n            },\n          });\n        } else {\n          const messageUpdate = await prisma.message.create({\n            data: {\n              roomId: roomId,\n              audio: req.body.message,\n              userId: user.id,\n              userName: user.name,\n              type: "audio",\n            },\n          });\n        }\n        res.status(200).json({ message: "Message Saved" });\n      } catch (e: any) {\n        // The .code property can be accessed in a type-safe manner\n        if (e?.code === "P2002") {\n          console.log(\n            "There is a unique constraint violation, a new user cannot be created with this email"\n          );\n        }\n\n        throw e;\n      }\n      break;\n    default:\n      res.status(405).json({ errof: "Method not allowed" });\n  }\n}\n' }, { "path": "server/[serverId]", "id": "server/[serverId]", "file": "server/[serverId].ts", "absPath": "/server/[serverId]", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport pris from "../../utils/prisma";\ninterface user {\n  id: number;\n}\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  switch (req.method) {\n    case "GET":\n      try {\n        const prisma = pris;\n        const serverId:number = parseInt(req.params.serverId);\n        const rooms = await prisma.room.findMany({\n            where: { serverId: serverId },\n        });\n        res.status(200).json({ ...rooms });\n      } catch (error: any) {\n        res.status(500).json(error);\n      }\n      break;\n    default:\n      res.status(405).json({ errof: "Method not allowed" });\n  }\n}\n' }, { "path": "room/room", "id": "room/room/index", "file": "room/room/index.ts", "absPath": "/room/room", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport pris from "../../../utils/prisma";\nimport { verifyToken } from "../../../utils/jwt";\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n    switch (req.method) {\n        case "PATCH":\n        try {\n            const prisma = pris;\n            const roomId: number = parseInt(req.body.roomId);\n            const tok = req.headers.authorization?.split(" ")[1];\n            const token = await verifyToken(tok as string);\n            const user = await prisma.user.findUnique({\n            where: { id: token.id },\n            });\n            if (!user || !token) {\n            res.status(500).json({ message: "Invalid token" });\n            break;\n            }\n            console.log(token)\n            const joinRoom = await prisma.user.update({\n                where: {\n                    id: user.id\n                },\n                data: {\n                    roomId: roomId\n                }\n            })\n\n            res.status(201).json({ message: "Joined" });\n        } catch (error: any) {\n            res.status(500).json(error);\n        }\n        break;\n        default:\n        res.status(405).json({ errof: "Method not allowed" });\n    }\n}\n' }, { "path": "posts/[postId]", "id": "posts/[postId]", "file": "posts/[postId].ts", "absPath": "/posts/[postId]", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\n \nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  res.status(400).json({ error: "This API is not implemented yet." })\n}' }, { "path": "register", "id": "register/index", "file": "register/index.ts", "absPath": "/register", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport bcrypt from "bcryptjs";\nimport { signToken } from "../../utils/jwt";\nimport pris from "../../utils/prisma";\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  switch (req.method) {\n    case "POST":\n      try {\n        const prisma = pris;\n\n        const findUser = await prisma.user.findUnique({\n          where: { email: req.body.email },\n        });\n        if (findUser) {\n          res.status(409)\n            .json({ message: "User already exists" });\n          break;\n        }\n        const user = await prisma.user.create({\n          data: {\n            email: req.body.email,\n            passwordHash: bcrypt.hashSync(req.body.password, 8),\n            name: req.body.name,\n            avatarUrl: req.body.avatarUrl,\n          },\n        });\n        const token = await signToken(user.id);\n        const server = await prisma.server.create({\n          data: {\n            userId: user.id,\n            serverName: `${user.name}\'s server`\n          }\n        });\n        const userServers = await prisma.userServers.create({\n          data:{\n            userId: user.id,\n            serverId: server.id,\n          }\n        })\n        res\n          .status(201)\n          .setCookie("token", token)\n          .json({ ...user, passwordHash: undefined, token: token });\n        await prisma.$disconnect();\n      } catch (e: any) {\n        res.status(500).json({\n          result: false,\n          message:\n            typeof e.code === "string"\n              ? "https://www.prisma.io/docs/reference/api-reference/error-reference#" +\n                e.code.toLowerCase()\n              : e,\n        });\n      }\n      break;\n    default:\n      // \u5982\u679C\u4E0D\u662F POST \u8BF7\u6C42\uFF0C\u4EE3\u8868\u4ED6\u6B63\u5728\u7528\u9519\u8BEF\u7684\u65B9\u5F0F\u8BBF\u95EE\u8FD9\u4E2A API\n      res.status(405).json({ error: "Method not allowed" });\n  }\n}\n' }, { "path": "room/new", "id": "room/new/index", "file": "room/new/index.ts", "absPath": "/room/new", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
+import pris from "../../../utils/prisma";
+import { verifyToken } from "../../../utils/jwt";
+import verify from "../../token";
 import { Prisma } from "@prisma/client";
 
 export default async function (req: UmiApiRequest, res: UmiApiResponse) {
@@ -520,41 +511,65 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
       res.status(405).json({ errof: "Method not allowed" });
   }
 }
-` }, { "path": "verify", "id": "verify", "file": "verify.ts", "absPath": "/verify", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
-import { verifyToken } from "../utils/jwt";
-import pris from "../utils/prisma";
+` }, { "path": "server", "id": "server/index", "file": "server/index.ts", "absPath": "/server", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
+import pris from "../../utils/prisma";
+import { verifyToken } from "../../utils/jwt";
 
-export default async function (req:UmiApiRequest, res:UmiApiResponse) {
-  switch (req.method){
-    case 'GET':
-        try {
-            const prisma = pris;
-            const tok = req.headers.authorization?.split(' ')[1];
-            const token = await verifyToken(tok as string);
-            const user = await prisma.user.findUnique({
-              where:{id:token.id}
-            })
-            if (!user || !token){
-              res.status(500).json({message: 'Invalid token'})
-              break;
-            }
-            res.status(200)
-            .json({...user, passwordHash:undefined});
+interface user {
+  id: number;
+}
+
+export default async function (req: UmiApiRequest, res: UmiApiResponse) {
+  switch (req.method) {
+    case "POST":
+      try {
+        const prisma = pris;
+        const tok = req.headers.authorization?.split(" ")[1];
+        const token = await verifyToken(tok as string);
+        const user = await prisma.user.findUnique({
+          where: { id: token.id },
+        });
+        if (!user || !token){
+          res.status(500).json({message: 'Invalid token'})
+          break;
         }
-       catch(error: any) {
-        res.status(500).json(error)
+        if (user) {
+          const userId: number = user.id;
+          const server = await prisma.server.create({
+            data: {
+              userId: user.id,
+              serverName: req.body.serverName,
+            },
+          });
+          const userServers = await prisma.userServers.create({
+            data: {
+              userId: user.id,
+              serverId: server.id,
+            },
+          });
+          res.status(201).json({ ...userServers });
+          await prisma.$disconnect();
+        }
+      } catch (e: any) {
+        res.status(500).json({
+          result: false,
+          message:
+            typeof e.code === "string"
+              ? "https://www.prisma.io/docs/reference/api-reference/error-reference#" +
+                e.code.toLowerCase()
+              : e,
+        })
       }
       break;
     default:
-      res.status(405).json({ errof:'Method not allowed' })
+      res.status(405).json({ error: "Method not allowed" });
   }
-}` }, { "path": "login", "id": "login", "file": "login.ts", "absPath": "/login", "__content": ` import type { UmiApiRequest, UmiApiResponse } from "umi";
+}
+` }, { "path": "login", "id": "login/index", "file": "login/index.ts", "absPath": "/login", "__content": ` import type { UmiApiRequest, UmiApiResponse } from "umi";
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-import { signToken } from "../utils/jwt";
-import pris from "../utils/prisma";
+import { signToken } from "../../utils/jwt";
+import pris from "../../utils/prisma";
 
 export default async function (req:UmiApiRequest, res:UmiApiResponse) {
   switch (req.method){
@@ -577,6 +592,36 @@ export default async function (req:UmiApiRequest, res:UmiApiResponse) {
           .json({...user, passwordHash:undefined, token: token});
         await prisma.$disconnect();
       } catch(error: any) {
+        res.status(500).json(error)
+      }
+      break;
+    default:
+      res.status(405).json({ errof:'Method not allowed' })
+  }
+}` }, { "path": "posts", "id": "posts/index", "file": "posts/index.ts", "absPath": "/posts", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\n \nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  res.status(400).json({ error: "This API is not implemented yet." })\n}' }, { "path": "token", "id": "token/index", "file": "token/index.ts", "absPath": "/token", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
+import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+import { verifyToken } from "../../utils/jwt";
+import pris from "../../utils/prisma";
+
+export default async function (req:UmiApiRequest, res:UmiApiResponse) {
+  switch (req.method){
+    case 'GET':
+        try {
+            const prisma = pris;
+            const tok = req.headers.authorization?.split(' ')[1];
+            const token = await verifyToken(tok as string);
+            const user = await prisma.user.findUnique({
+              where:{id:token.id}
+            })
+            if (!user || !token){
+              res.status(500).json({message: 'Invalid token'})
+              break;
+            }
+            res.status(200)
+            .json({...user, passwordHash:undefined});
+        }
+       catch(error: any) {
         res.status(500).json(error)
       }
       break;

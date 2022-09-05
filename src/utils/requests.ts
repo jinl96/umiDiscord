@@ -27,7 +27,7 @@ const apiRequest = async ({
   const requestOptions = {
     method: method || "GET",
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json;charset=utf-8',
       Accept: "application/json",
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -50,19 +50,19 @@ export const register = (body: registerBodyType) => {
 };
 
 export const verifyToken = () => {
-  return apiRequest({ method: "GET", url: "/api/verify" });
+  return apiRequest({ method: "GET", url: "/api/token" });
 };
 
 export const addServer = (serverName: string) => {
   return apiRequest({
     method: "POST",
-    url: "/api/newServer",
+    url: "/api/server",
     body: { serverName: serverName },
   });
 };
 
 export const getServerList = () => {
-  return apiRequest({ method: "GET", url: "/api/getServerList" });
+  return apiRequest({ method: "GET", url: "/api/server/serverList" });
 };
 
 export const getRoomList = (serverId: number) => {
@@ -72,28 +72,32 @@ export const getRoomList = (serverId: number) => {
 export const addRoom = (roomName: string, serverId: number) => {
   return apiRequest({
     method: "POST",
-    url: "/api/addRoom",
+    url: "/api/room/new",
     body: { roomName: roomName, serverId: serverId },
   });
 };
 
 export const enterRoom = (roomId: number) => {
-    return apiRequest({ method: "POST", url: `/api/room/joinRoom`, body: { roomId: roomId } })
+    return apiRequest({ method: "PATCH", url: `/api/room/room`, body: { roomId: roomId } })
 }
 
-export const saveMessage = (roomId:number, message:string) => {
-  return apiRequest({ method:'POST', url:`/api/room/sendMessage`, body: { roomId: roomId, message: message } })
+export const saveMessage = (roomId:number, message:string|Blob, type:string='text') => {
+    return apiRequest({ method:'POST', url:`/api/room/message`, body: { roomId, message, type:type } })
 }
 
 export const getMessage = (roomId:number) => {
-  return apiRequest({ method:'POST', url:`/api/room/getMessage`, body: { roomId: roomId } })
+  return apiRequest({ method:'POST', url:`/api/room/historyMessage`, body: { roomId: roomId } })
+}
+
+export const getLatestVoiceMessage = (roomId:number) => {
+  return apiRequest({ method:'GET', url:`/api/room/voiceMessage/${roomId}` })
 }
 
 export const serverSubscription = (serverId: number) => {
-  return apiRequest({ method: "POST", url: "/api/server/subscribe", body: { serverId: serverId } });
+  return apiRequest({ method: "POST", url: "/api/server/subscription", body: { serverId: serverId } });
 }
 
-export const getTokenForRoomEnter = (userId: number): string => {
+export const getTokenForUser = (userId: number): string => {
   const {
     RtcTokenBuilder,
     RtmTokenBuilder,

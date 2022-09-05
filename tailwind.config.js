@@ -10,5 +10,6 @@ module.exports = {
         'bounce-fast':'bounce 0.2s ease-in-out 1.5s'
       }
     }
-  }
+  },
+  mode:'jit'
 }

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import styles from './dashboard.less';
-import { addServer, verifyToken, getServerList, getRoomList, addRoom, getTokenForRoomEnter, serverSubscription } from '@/utils/requests';
+import { addServer, verifyToken, getServerList, getRoomList, addRoom, getTokenForUser, serverSubscription } from '@/utils/requests';
 import { message, Button, Modal, Input } from 'antd';
 import { Navigate, useNavigate } from 'umi';
 import { RtmChannel, RtmClient } from 'agora-rtm-sdk';
@@ -70,11 +70,17 @@ export default function Dashboard() {
 
   const [serverSubInput, setServerSubInput] = useState<number>()
 
-  const selectedRoomName = React.useMemo(() => { return roomList.find(item => item.id === selectedRoomId)?.name }, [selectedRoomId, roomList])
+  const selectedRoomName:string|undefined = React.useMemo(() => {  
+    let room = roomList.find(item => item.id === selectedRoomId)
+    if (room) {
+      return room.name
+    }
+  }, [selectedRoomId])
+
 
 
   const navigate = useNavigate();
-
+  
   React.useEffect(() => {
     if (selectedServerId) {
       updateRoomList();
@@ -91,7 +97,7 @@ export default function Dashboard() {
             res.json().then(async res => {
               setUser(res);
               const { default: AgoraRTM } = await import('agora-rtm-sdk');
-              const token = getTokenForRoomEnter(res.id!);
+              const token = getTokenForUser(res.id!);
               const client = AgoraRTM.createInstance(process.env.AGORA_ID!);
               setChatUserClient(client);
               const uid = res.id!.toString();
@@ -185,7 +191,7 @@ export default function Dashboard() {
   const enterSelectedRoom = (roomId: number) => {
     setSelectedRoomId(roomId);
     if (typeof user?.id === 'number') {
-      console.log(getTokenForRoomEnter(user.id));
+      console.log(getTokenForUser(user.id));
     }
   }
 
@@ -209,7 +215,7 @@ export default function Dashboard() {
 
   if (typeof user?.id === 'number') {
     return (
-      <div>
+      <div className='min-h-screen flex flex-col overflow-auto'>
         <div className='fixed min-h-50 min-w-150 top-1/2 left-1/2'>
           <Modal onCancel={() => {
             setModalVisible(!modalVisible)
@@ -243,11 +249,14 @@ export default function Dashboard() {
             placeholder='enter server id'>
           </Input>
           <Button onClick={subscribeToServer}>subscribe</Button>
+          <div className='h-5 ml-3'>
+          {selectedServerId &&  `You are in server: ${selectedServerId}` }
+          </div>
         </div>
-        <div className='flex flex-row min-h-screen'>
-          <div className='flex flex-col items-center min-h-full min-w-min w-1/12 bg-indigo-100' style={{ minWidth: '100px' }}>
+        <div className='flex flex-row flex-1'>
+          <div className='flex flex-col items-center min-h-full bg-indigo-100' style={{ width:'75px' }}>
             Servers
-            <div className='flex mt-1 mb-1 flex-col justify-center align-center items-center rounded-full bg-yellow-200 h-20 w-20'>
+            <div className='flex mt-1 mb-1 flex-col justify-center align-center items-center rounded-full bg-yellow-200 h-14 w-14'>
               <svg onClick={() => setModalVisible(!modalVisible)} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 cursor-pointer">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
@@ -260,11 +269,12 @@ export default function Dashboard() {
                   <div key={server.id}
                     onClick={() => {
                       setSelectedServerId(server.id)
-                      setSelectedRoomId(void 0)
-                    }} className={`cursor-pointer p-3 flex mt-1 mb-1 flex-col justify-center text-center items-center rounded-full ${color} h-20 w-20`}>
+                      // setSelectedRoomId(void 0)
+                    }} className={`cursor-pointer p-3 flex mt-1 mb-1 flex-col justify-center text-center items-center rounded-full ${color} h-14 w-14`}>
                     {server.serverName}
                   </div>)
               })
+
             }
             {
               subscribedServerList.map((server) => {
@@ -274,8 +284,8 @@ export default function Dashboard() {
                   <div key={server.id}
                     onClick={() => {
                       setSelectedServerId(server.id)
-                      setSelectedRoomId(void 0)
-                    }} className={`cursor-pointer p-3 flex mt-1 mb-1 flex-col justify-center text-center items-center rounded-full ${color} h-20 w-20`}>
+                      // setSelectedRoomId(void 0)
+                    }} className={`cursor-pointer p-3 flex mt-1 mb-1 flex-col justify-center text-center items-center rounded-full ${color} h-14 w-14`}>
                     {server.serverName}
                   </div>)
               })
@@ -299,7 +309,7 @@ export default function Dashboard() {
               })
             }
           </div>
-          <div className='flex min-h-full min-w-full w-full'>
+          <div className='flex min-h-full w-full p-5'>
             <ChatPanel userName={user.name!} chatClient={chatUserClient!} userId={user.id} selectedRoomId={selectedRoomId} selectedRoomName={selectedRoomName}></ChatPanel>
           </div>
         </div>

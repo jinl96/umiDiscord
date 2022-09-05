@@ -23,6 +23,13 @@ var __copyProps = (to, from, except, desc) => {
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target, mod));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+// src/api/room/voiceMessage/index.ts
+var require_voiceMessage = __commonJS({
+  "src/api/room/voiceMessage/index.ts"() {
+    "use strict";
+  }
+});
+
 // node_modules/.pnpm/@umijs+preset-umi@4.0.15_rbiprd2jedhqzym5fmfgp6qxse/node_modules/@umijs/preset-umi/dist/features/apiRoute/utils.js
 var require_utils = __commonJS({
   "node_modules/.pnpm/@umijs+preset-umi@4.0.15_rbiprd2jedhqzym5fmfgp6qxse/node_modules/@umijs/preset-umi/dist/features/apiRoute/utils.js"(exports, module2) {
@@ -358,26 +365,22 @@ var require_apiRoute = __commonJS({
   }
 });
 
-// src/.umi/api/posts/[postId].ts
-var postId_exports = {};
-__export(postId_exports, {
-  default: () => postId_default2
+// src/.umi/api/room/voiceMessage/index.ts
+var voiceMessage_exports = {};
+__export(voiceMessage_exports, {
+  default: () => voiceMessage_default
 });
-module.exports = __toCommonJS(postId_exports);
+module.exports = __toCommonJS(voiceMessage_exports);
 
 // src/.umi/api/_middlewares.ts
 var middlewares_default = async (req, res, next) => {
   next();
 };
 
-// src/api/posts/[postId].ts
-async function postId_default(req, res) {
-  res.status(400).json({ error: "This API is not implemented yet." });
-}
-
-// src/.umi/api/posts/[postId].ts
+// src/.umi/api/room/voiceMessage/index.ts
+var import_voiceMessage = __toESM(require_voiceMessage());
 var import_apiRoute = __toESM(require_apiRoute());
-var apiRoutes = [{ "path": "room/voiceMessage/[roomId]", "id": "room/voiceMessage/[roomId]", "file": "room/voiceMessage/[roomId].ts", "absPath": "/room/voiceMessage/[roomId]", "__content": "" }, { "path": "room/historyMessage", "id": "room/historyMessage/index", "file": "room/historyMessage/index.ts", "absPath": "/room/historyMessage", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport pris from "../../../utils/prisma";\nimport { verifyToken } from "../../../utils/jwt";\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  switch (req.method) {\n    case "POST":\n      try {\n        const prisma = pris;\n        const roomId: number = req.body.roomId;\n        const tok = req.headers.authorization?.split(" ")[1];\n        const token = await verifyToken(tok as string);\n        const message = req.body.message;\n        const user = await prisma.user.findUnique({\n          where: { id: token.id },\n        });\n        if (!user || !token) {\n          res.status(500).json({ message: "Invalid token" });\n          break;\n        }\n        const messages = await prisma.message.findMany({\n            where: { roomId: roomId },\n            orderBy: { createdAt: "asc" },\n        })\n        res.status(200).json({ message: "Loaded Messages", messages: messages });\n      } catch (error: any) {\n        res.status(500).json(error);\n      }\n      break;\n    default:\n      res.status(405).json({ errof: "Method not allowed" });\n  }\n}\n' }, { "path": "server/subscription", "id": "server/subscription/index", "file": "server/subscription/index.ts", "absPath": "/server/subscription", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
+var apiRoutes = [{ "path": "room/historyMessage", "id": "room/historyMessage/index", "file": "room/historyMessage/index.ts", "absPath": "/room/historyMessage", "__content": 'import type { UmiApiRequest, UmiApiResponse } from "umi";\nimport pris from "../../../utils/prisma";\nimport { verifyToken } from "../../../utils/jwt";\n\nexport default async function (req: UmiApiRequest, res: UmiApiResponse) {\n  switch (req.method) {\n    case "POST":\n      try {\n        const prisma = pris;\n        const roomId: number = req.body.roomId;\n        const tok = req.headers.authorization?.split(" ")[1];\n        const token = await verifyToken(tok as string);\n        const message = req.body.message;\n        const user = await prisma.user.findUnique({\n          where: { id: token.id },\n        });\n        if (!user || !token) {\n          res.status(500).json({ message: "Invalid token" });\n          break;\n        }\n        const messages = await prisma.message.findMany({\n            where: { roomId: roomId },\n            orderBy: { createdAt: "asc" },\n        })\n        res.status(200).json({ message: "Loaded Messages", messages: messages });\n      } catch (error: any) {\n        res.status(500).json(error);\n      }\n      break;\n    default:\n      res.status(405).json({ errof: "Method not allowed" });\n  }\n}\n' }, { "path": "server/subscription", "id": "server/subscription/index", "file": "server/subscription/index.ts", "absPath": "/server/subscription", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
 import pris from "../../../utils/prisma";
 import { verifyToken } from "../../../utils/jwt";
 
@@ -418,7 +421,7 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
       res.status(405).json({ errof: "Method not allowed" });
   }
 }
-` }, { "path": "server/serverList", "id": "server/serverList/index", "file": "server/serverList/index.ts", "absPath": "/server/serverList", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
+` }, { "path": "room/voiceMessage", "id": "room/voiceMessage/index", "file": "room/voiceMessage/index.ts", "absPath": "/room/voiceMessage", "__content": "" }, { "path": "server/serverList", "id": "server/serverList/index", "file": "server/serverList/index.ts", "absPath": "/server/serverList", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
 import pris from "../../../utils/prisma";
 import { verifyToken } from "../../../utils/jwt";
 import verify from "../../token";
@@ -630,12 +633,12 @@ export default async function (req:UmiApiRequest, res:UmiApiResponse) {
       res.status(405).json({ errof:'Method not allowed' })
   }
 }` }, { "path": "URL", "id": "URL", "file": "URL.ts", "absPath": "/URL", "__content": "export const API_URL = 'http://localhost:8000';\nexport default API_URL;" }];
-var postId_default2 = async (req, res) => {
+var voiceMessage_default = async (req, res) => {
   const umiReq = new import_apiRoute.UmiApiRequest(req, apiRoutes);
   await umiReq.readBody();
   const umiRes = new import_apiRoute.UmiApiResponse(res);
   await new Promise((resolve) => middlewares_default(umiReq, umiRes, resolve));
-  await postId_default(umiReq, umiRes);
+  await (0, import_voiceMessage.default)(umiReq, umiRes);
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {});
