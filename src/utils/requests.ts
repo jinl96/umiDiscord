@@ -1,4 +1,4 @@
-import { API_URL } from "../api/URL";
+// const API_URL = '/'
 
 type myRequest = {
   method?: undefined | string;
@@ -34,7 +34,7 @@ const apiRequest = async ({
     body: body ? JSON.stringify(body) : undefined,
   };
   try {
-    const response = await fetch(`${API_URL}${url}`, requestOptions);
+    const response = await fetch(`${url}`, requestOptions);
     return response;
   } catch (error) {
     return error;

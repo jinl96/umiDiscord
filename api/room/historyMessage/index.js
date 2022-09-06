@@ -33014,7 +33014,7 @@ export default async function (req:UmiApiRequest, res:UmiApiResponse) {
     default:
       res.status(405).json({ errof:'Method not allowed' })
   }
-}` }, { "path": "URL", "id": "URL", "file": "URL.ts", "absPath": "/URL", "__content": "export const API_URL = 'http://localhost:8000';\nexport default API_URL;" }];
+}` }];
 var historyMessage_default2 = async (req, res) => {
   const umiReq = new import_apiRoute.UmiApiRequest(req, apiRoutes);
   await umiReq.readBody();
