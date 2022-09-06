@@ -89,6 +89,7 @@ export default function Dashboard() {
 
   React.useEffect(() => {
     const tok = localStorage.getItem('token') as string;
+    console.log(process.env);
     if (tok) {
       (async () => {
         try {
@@ -98,7 +99,6 @@ export default function Dashboard() {
               setUser(res);
               const { default: AgoraRTM } = await import('agora-rtm-sdk');
               const token = getTokenForUser(res.id!);
-              console.log(process.env);
               const client = AgoraRTM.createInstance(process.env.AGORA_ID!);
               setChatUserClient(client);
               const uid = res.id!.toString();
