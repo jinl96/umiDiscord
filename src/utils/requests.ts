@@ -81,8 +81,8 @@ export const enterRoom = (roomId: number) => {
     return apiRequest({ method: "PATCH", url: `/api/room/room`, body: { roomId: roomId } })
 }
 
-export const saveMessage = (roomId:number, message:string|Blob, type:string='text') => {
-    return apiRequest({ method:'POST', url:`/api/room/message`, body: { roomId, message, type:type } })
+export const saveMessage = (roomId:number, message:string|Blob, type:string='text', duration:number|undefined=undefined) => {
+    return apiRequest({ method:'POST', url:`/api/room/message`, body: { roomId, message, type:type, duration } })
 }
 
 export const getMessage = (roomId:number) => {

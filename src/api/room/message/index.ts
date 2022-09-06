@@ -35,6 +35,7 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
               audio: req.body.message,
               userId: user.id,
               userName: user.name,
+              duration: req.body?.duration,
               type: "audio",
             },
           });

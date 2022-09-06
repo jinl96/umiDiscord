@@ -88,6 +88,7 @@ model Message {
   type     String    @default("text")
   content   String? 
   audio     String?   @db.LongText
+  duration  Int?           
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    Int

@@ -1,12 +1,11 @@
 import { enterRoom, saveMessage, getMessage, getLatestVoiceMessage } from '@/utils/requests';
 import { RtmChannel, RtmClient } from 'agora-rtm-sdk';
 import { message, Input, Button } from 'antd';
-import { resolveOnChange } from 'antd/lib/input/Input';
 import React, { useState } from 'react'
 import { APIResponse } from '../RegisterForm/RegisterForm';
 import Recorder from '../Recorder/Recorder';
 import ReactAudioPlayer from 'react-audio-player';
-
+import ChatBubble from '../ChatBubble';
 
 type Props = {
     selectedRoomId: number | undefined;
@@ -22,6 +21,7 @@ type MessageType = {
     text: string|undefined;
     audio: string|undefined;
     type: string;
+    duration: number|undefined;
 }
 
 type HistoryMessageType = {
@@ -32,6 +32,7 @@ type HistoryMessageType = {
     createdAt: string;
     roomId: number;
     type: string;
+    duration: number|undefined;
 }
 
 type GetMessageResponse = {
@@ -46,6 +47,7 @@ type GetVoiceResponse = {
 }
 
 export type setVoiceMessageType = React.Dispatch<React.SetStateAction<string | undefined>>;
+export type setVoiceDurationType = React.Dispatch<React.SetStateAction<number>>;
 
 const ChatPanel: React.FC<Props> = ({ userId, selectedRoomId, selectedRoomName, chatClient, userName }): JSX.Element => {
 
@@ -55,6 +57,7 @@ const ChatPanel: React.FC<Props> = ({ userId, selectedRoomId, selectedRoomName, 
     const [messages, setMessages] = useState<MessageType[]>([]);
     const [voiceMessage, setVoiceMessage] = useState<string>();
     const [voice, setVoice] = useState<string>();
+    const [voiceDuration, setVoiceDuration] = useState<number>(0);
 
     React.useEffect(() => {
         let channel: RtmChannel;
@@ -81,8 +84,7 @@ const ChatPanel: React.FC<Props> = ({ userId, selectedRoomId, selectedRoomName, 
                                     console.log(res);
                                     if (res?.ok) {
                                         res.json().then((data: any) => {
-                                            console.log(data);
-                                            setMessages(prev => [...prev, { ...content, type: 'audio', audio: data.messages.audio,text:undefined }])
+                                            setMessages(prev => [...prev, { ...content, type: 'audio', audio: data.messages.audio,text:undefined, duration:voiceDuration }])
                                         })
                                     }
                                 }).catch((err) => {
@@ -101,15 +103,13 @@ const ChatPanel: React.FC<Props> = ({ userId, selectedRoomId, selectedRoomName, 
         }
     }, [selectedRoomId])
 
-    console.log(voice);
-
     React.useEffect(() => {
         if (!selectedRoomId) return;
         if (!channel) return;
         if (voiceMessage) {
             (async () => {
-                const saveMessageToDb = await saveMessage(selectedRoomId, voiceMessage, 'audio') as unknown as APIResponse;
-                setMessages(prev => [...prev, { userId, userName: userName, text: undefined, type: 'audio', audio: voiceMessage }]);
+                const saveMessageToDb = await saveMessage(selectedRoomId, voiceMessage, 'audio', voiceDuration) as unknown as APIResponse;
+                setMessages(prev => [...prev, { userId, userName: userName, text: undefined, type: 'audio', audio: voiceMessage, duration: voiceDuration }]);
                 channel.sendMessage({ text: JSON.stringify({ userId: userId, text: `${process.env.VOICE_KEY}newVoice${selectedRoomId}`, userName: userName }) });
             })()
         }
@@ -121,7 +121,7 @@ const ChatPanel: React.FC<Props> = ({ userId, selectedRoomId, selectedRoomName, 
         const inp = userInput;
         setUserInput('');
         channel.sendMessage({ text: JSON.stringify({ userId: userId, text: inp, userName: userName }) });
-        setMessages(prev => [...prev, { userId, userName: userName, text: inp, type: 'text', audio: undefined }]);
+        setMessages(prev => [...prev, { userId, userName: userName, text: inp, type: 'text', audio: undefined, duration: undefined}]);
         const saveMessageToDb = await saveMessage(selectedRoomId, inp);
     }
 
@@ -133,46 +133,40 @@ const ChatPanel: React.FC<Props> = ({ userId, selectedRoomId, selectedRoomName, 
                     historyMessages.map((message, index) => {
                         if (message?.type === 'audio') {
                             return (
-                                <div key={index} className='flex flex-row'>
-                                    <p className='font-bold'>{message.userName}:</p>
-                                    <Button onClick={() => setVoice(message.audio)}>audio</Button>
-                                </div>
+                                <ChatBubble type={message.type} audio={message.audio} duration={message.duration}
+                                userName={message.userName} key={`voice${index}`} text={undefined} userId={0} setVoice={setVoice}/>
+                
                             )
                         }
                         return (
-                            <div key={index} className='flex flex-row'>
-                                <p className='font-bold'>{message.userName}:</p>
-                                <p className='pl-2'>{message.content}</p>
-                            </div>
+                            <ChatBubble type={message.type}  audio={message.audio} duration={message.duration}
+                            userName={message.userName} key={`text${index}`} text={message.content} userId={0} setVoice={void 0}/>
                         )
                     })
                 }
                 {messages.map((message, index) => {
                     if (message?.type === 'audio') {
                         return (
-                            <div key={index} className='flex flex-row'>
-                                <p className='font-bold'>{message.userName}:</p>
-                                <Button onClick={() => setVoice(message.audio)}>audio</Button>
-                            </div>
+                            <ChatBubble type={message.type} audio={message.audio} duration={message.duration}
+                            userName={message.userName} key={`voice${index}`}  text={undefined} userId={0} setVoice={setVoice}/>
                         )
                     }
                     return (
-                        <div key={index} className='flex flex-col items-start'>
-                            <div className='flex items-center'>
-                                <p className='font-bold'>{message.userName}:</p>
-                                <p className='pl-2'>{message.text}</p>
-                            </div>
-                            <div className='flex-1'></div>
-                        </div>
+                        <ChatBubble type={message.type}  audio={message.audio} duration={message.duration}
+                        userName={message.userName} key={`text${index}`} text={message.text} userId={0} setVoice={void 0}/>
                     )
                 }
                 )}
             </div>
             <Input className="pl-3" style={{ height: '50px' }} placeholder="Type your message" value={userInput} onPressEnter={handleSubmit} onChange={(e) => setUserInput(e.target.value)} />
-            <Recorder setVoiceMessage={setVoiceMessage as setVoiceMessageType}></Recorder>
-            <ReactAudioPlayer src={voice} autoPlay></ReactAudioPlayer>
+            <Recorder setVoiceMessage={setVoiceMessage as setVoiceMessageType} setVoiceDuration={setVoiceDuration as setVoiceDurationType}></Recorder>
+            <ReactAudioPlayer src={voice} autoPlay controls></ReactAudioPlayer>
         </div>
     )
 }
 
 export default ChatPanel
+
+function duration(selectedRoomId: number, voiceMessage: string, arg2: string, duration: any, voiceDuration: number): unknown {
+    throw new Error('Function not implemented.');
+}
